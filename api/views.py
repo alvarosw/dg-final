@@ -149,3 +149,22 @@ class ConsumerAPIView(APIView):
         return DiscountRules.objects.get(
             consumer_type=consumer_type, consumption_range=consumption_range
         )
+
+
+class DiscountRuleAPIView(APIView):
+    def get(self, request):
+        discount_rules = DiscountRules.objects.all()
+        data = DiscountRuleSerializer(discount_rules, many=True).data
+
+        return Response({"discount_rules": data})
+
+
+class DiscountCoverageRuleAPIView(APIView):
+    def get(self, request):
+        return Response(
+            {
+                "< 10.000 kWh": "90%",
+                ">= 10.000 kWh e <= 20.000 kWh": "95%",
+                "> 20.000 kWh": "99%",
+            }
+        )
