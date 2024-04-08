@@ -13,7 +13,8 @@
 
 - Deverá ser utilizada a linguagem Python, o framework Django e o framework Django Rest Framework para desenvolver as soluções;
 - Deverá ser criada uma branch nomeada com o seu nome e abrir um pull request para concluir a entrega do teste;
-- <strong>Atenção</strong>: O candidato precisa fazer o fork do repositório para conseguir abrir o pull request.
+- <strong>Atenção</strong>: O candidato precisa fazer o fork do repositório para conseguir abrir o pull request;
+- É necessário submeter um vídeo, com duração máxima de 5 minutos, que explique as funcionalidades do projeto. Recomendamos o uso da extensão ‘Awesome Screenshot’ para navegadores, que permite gravar o vídeo e gerar um link direto para ele. Este link deve ser incluído no arquivo ‘Readme’ do projeto.
 
 <hr>
 <h2 id="observacoes" style="text-align:center;border-bottom:none">Observações</h2>
