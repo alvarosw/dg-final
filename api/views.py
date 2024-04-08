@@ -6,7 +6,7 @@ from consumer.models import Consumer, ConsumerType, ConsumptionRange, DiscountRu
 from .serializers import (
     CalculatorInputSerializer,
     ConsumerSerializer,
-    ConsumerCreationSerializer,
+    ConsumerSaveSerializer,
     DiscountRuleSerializer,
 )
 
@@ -82,7 +82,7 @@ class ConsumerAPIView(APIView):
         return Response({"consumers": data})
 
     def post(self, request):
-        serializer = ConsumerCreationSerializer(data=request.data)
+        serializer = ConsumerSaveSerializer(data=request.data)
         if serializer.is_valid():
             consumer_type = serializer.validated_data["consumer_type"]
             consumption = serializer.validated_data["consumption"]
@@ -97,6 +97,31 @@ class ConsumerAPIView(APIView):
             ).data
 
             return Response(serializer.validated_data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def put(self, request, pk):
+        try:
+            consumer = Consumer.objects.get(pk=pk)
+        except Consumer.DoesNotExist:
+            return Response(
+                {"error": "Consumer not found"}, status=status.HTTP_404_NOT_FOUND
+            )
+
+        serializer = ConsumerSaveSerializer(consumer, data=request.data)
+        if serializer.is_valid():
+            consumer_type = serializer.validated_data["consumer_type"]
+            consumption = serializer.validated_data["consumption"]
+            discount_rule = self.get_discount_rule(consumer_type, consumption)
+
+            serializer.validated_data["discount_rule"] = discount_rule
+            del serializer.validated_data["consumer_type"]
+
+            serializer.save()
+            serializer.validated_data["discount_rule"] = DiscountRuleSerializer(
+                discount_rule
+            ).data
+
+            return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def get_discount_rule(self, consumer_type, consumption):

@@ -18,7 +18,7 @@ class ConsumerSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class ConsumerCreationSerializer(serializers.ModelSerializer):
+class ConsumerSaveSerializer(serializers.ModelSerializer):
     consumer_type_choices = [(i.value, i.value) for i in ConsumerType]
     consumer_type = serializers.ChoiceField(
         choices=consumer_type_choices, required=True
