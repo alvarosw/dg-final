@@ -1,3 +1,5 @@
+import os
+
 """
 Django settings for core project.
 
@@ -39,6 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     #Own
     'consumer',
+    'calculator',
 ]
 
 MIDDLEWARE = [
@@ -56,7 +59,7 @@ ROOT_URLCONF = 'core.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'],
+        "DIRS": [os.path.join(BASE_DIR, "templates"), BASE_DIR / 'shared/templates'],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
