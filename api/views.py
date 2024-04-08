@@ -2,8 +2,13 @@ from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from .calculator import calculate
-from .serializers import CalculatorInputSerializer, ConsumerSerializer
-from consumer.models import Consumer
+from consumer.models import Consumer, ConsumerType, ConsumptionRange, DiscountRules
+from .serializers import (
+    CalculatorInputSerializer,
+    ConsumerSerializer,
+    ConsumerCreationSerializer,
+    DiscountRuleSerializer,
+)
 
 
 class CalculatorAPIView(APIView):
@@ -75,3 +80,36 @@ class ConsumerAPIView(APIView):
             )
 
         return Response({"consumers": data})
+
+    def post(self, request):
+        serializer = ConsumerCreationSerializer(data=request.data)
+        if serializer.is_valid():
+            consumer_type = serializer.validated_data["consumer_type"]
+            consumption = serializer.validated_data["consumption"]
+            discount_rule = self.get_discount_rule(consumer_type, consumption)
+
+            serializer.validated_data["discount_rule"] = discount_rule
+            del serializer.validated_data["consumer_type"]
+
+            Consumer.objects.create(**serializer.validated_data)
+            serializer.validated_data["discount_rule"] = DiscountRuleSerializer(
+                discount_rule
+            ).data
+
+            return Response(serializer.validated_data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def get_discount_rule(self, consumer_type, consumption):
+        consumer_type: ConsumerType = consumer_type
+        consumption = int(consumption)
+
+        if consumption < 10000:
+            consumption_range = ConsumptionRange.LESS_THAN_10K.value
+        elif 10000 <= consumption <= 20000:
+            consumption_range = ConsumptionRange.BETWEEN_10K_AND_20K.value
+        else:
+            consumption_range = ConsumptionRange.MORE_THAN_20K.value
+
+        return DiscountRules.objects.get(
+            consumer_type=consumer_type, consumption_range=consumption_range
+        )
