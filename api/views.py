@@ -124,6 +124,17 @@ class ConsumerAPIView(APIView):
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    def delete(self, request, pk):
+        try:
+            consumer = Consumer.objects.get(pk=pk)
+        except Consumer.DoesNotExist:
+            return Response(
+                {"error": "Consumer not found"}, status=status.HTTP_404_NOT_FOUND
+            )
+
+        consumer.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
     def get_discount_rule(self, consumer_type, consumption):
         consumer_type: ConsumerType = consumer_type
         consumption = int(consumption)
