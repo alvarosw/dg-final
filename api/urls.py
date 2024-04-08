@@ -1,6 +1,6 @@
 from django.urls import path
-from .views import calculator
+from .views import CalculatorAPIView
 
 urlpatterns = [
-    path("calculator/", calculator),
+    path("calculator/", CalculatorAPIView.as_view()),
 ]

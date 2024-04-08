@@ -1,5 +1,6 @@
+import os
+import requests
 from django.shortcuts import render
-from .calculator_python import calculate
 from .forms import CalculatorForm
 
 def calculator(request):
@@ -7,30 +8,17 @@ def calculator(request):
         form = CalculatorForm(request.POST)
         
         if form.is_valid():
-            (
-                annual_savings,
-                monthly_savings,
-                applied_discount,
-                coverage
-            ) = calculate(
-                [
-                    form.cleaned_data['consumption1'],
-                    form.cleaned_data['consumption2'],
-                    form.cleaned_data['consumption3']
-                ],
-                form.cleaned_data['distributor_tax'],
-                form.cleaned_data['tax_type']
+            response = requests.post(
+                f"{os.environ['API_HOST']}/calculator/",
+                data=form.cleaned_data
             )
 
-            return render(
-                request, 
-                'result.html', 
-                {
-                    'annual_savings': annual_savings,
-                    'monthly_savings': monthly_savings,
-                    'applied_discount': applied_discount,
-                    'coverage': coverage
-                })
+            if response.status_code == 200:
+                return render(
+                    request, 
+                    'result.html', 
+                    response.json()
+                )
 
     form = CalculatorForm()
     return render(request, 'form.html', { 'form': form })
