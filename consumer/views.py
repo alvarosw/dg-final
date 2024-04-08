@@ -1,67 +1,45 @@
+import os
+import requests
 from django.shortcuts import render, redirect
-from consumer.models import (
-    Consumer,
-    DiscountRules,
-    ConsumerType,
-    ConsumptionRange
-)
-from .forms import (
-    ConsumerFilterForm, 
-    ConsumerCreationForm
-)
+from consumer.models import Consumer, DiscountRules, ConsumerType, ConsumptionRange
+from .forms import ConsumerFilterForm, ConsumerCreationForm
+
 
 def consumer_list(request):
     filter_form = ConsumerFilterForm(request.GET)
-    consumers = Consumer.objects.all().select_related('discount_rule')
 
     if filter_form.is_valid():
-        consumer_type = filter_form.cleaned_data['consumer_type']
-        consumption_range = filter_form.cleaned_data['consumption_range']
-
-        if consumer_type:
-            consumers = consumers.filter(discount_rule__consumer_type=consumer_type)
-
-        if consumption_range:
-            consumers = consumers.filter(discount_rule__consumption_range=consumption_range)
-
-    data = []
-    for consumer in consumers:
-        monthly_savings = (
-            consumer.consumption *
-            consumer.distributor_tax *
-            consumer.discount_rule.discount_value *
-            consumer.discount_rule.cover_value
+        response = requests.get(
+            f"{os.environ['API_HOST']}/consumer/", params=filter_form.cleaned_data
         )
+    else:
+        response = requests.get(f"{os.environ['API_HOST']}/consumer/")
 
-        data.append({
-            "data": consumer,
-            "monthly_savings": round(monthly_savings, 2),
-            "annual_savings": round(monthly_savings * 12, 2)
-        })
+    return render(request, "list.html", {**response.json(), "filter_form": filter_form})
 
-    return render(request, 'list.html', {'consumers': data, 'filter_form': filter_form})
 
 def consumer_create(request):
-    if request.method == 'POST':
+    if request.method == "POST":
         form = ConsumerCreationForm(request.POST)
         if form.is_valid():
             discount_rule = get_discount_rule(
-                form.cleaned_data['consumer_type'], 
-                form.cleaned_data['consumption']
+                form.cleaned_data["consumer_type"], form.cleaned_data["consumption"]
             )
-            form.cleaned_data['discount_rule'] = discount_rule
-            del form.cleaned_data['consumer_type']
+            form.cleaned_data["discount_rule"] = discount_rule
+            del form.cleaned_data["consumer_type"]
             Consumer.objects.create(**form.cleaned_data)
 
-            return redirect('../consumer')
+            return redirect("../consumer")
         else:
-            return render(request, 'create.html', { 'form': form })
+            return render(request, "create.html", {"form": form})
 
     form = ConsumerCreationForm()
-    return render(request, 'create.html', { 'form': form })
+    return render(request, "create.html", {"form": form})
+
 
 def home(request):
-    return redirect('calculator/')
+    return redirect("calculator/")
+
 
 def get_discount_rule(consumer_type, consumption):
     consumer_type: ConsumerType = consumer_type
@@ -74,4 +52,6 @@ def get_discount_rule(consumer_type, consumption):
     else:
         consumption_range = ConsumptionRange.MORE_THAN_20K.value
 
-    return DiscountRules.objects.get(consumer_type=consumer_type, consumption_range=consumption_range)
+    return DiscountRules.objects.get(
+        consumer_type=consumer_type, consumption_range=consumption_range
+    )

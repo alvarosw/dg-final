@@ -27,15 +27,15 @@ Consumidor
     </tr>
     {% for consumer in consumers %}
     <tr>
-        <td>{{ consumer.data.name }}</td>
-        <td>{{ consumer.data.document }}</td>
-        <td>{{ consumer.data.zip_code|default_if_none:""}}</td>
-        <td>{{ consumer.data.city }}</td>
-        <td>{{ consumer.data.state }}</td>
-        <td>{{ consumer.data.consumption }}</td>
-        <td>{{ consumer.data.distributor_tax }}</td>
-        <td>{% widthratio consumer.data.discount_rule.discount_value 1 100 %}%</td>
-        <td>{% widthratio consumer.data.discount_rule.cover_value 1 100 %}%</td>
+        <td>{{ consumer.name }}</td>
+        <td>{{ consumer.document }}</td>
+        <td>{{ consumer.zip_code|default_if_none:""}}</td>
+        <td>{{ consumer.city }}</td>
+        <td>{{ consumer.state }}</td>
+        <td>{{ consumer.consumption }}</td>
+        <td>{{ consumer.distributor_tax }}</td>
+        <td>{% widthratio consumer.applied_discount 1 100 %}%</td>
+        <td>{% widthratio consumer.discount_coverage 1 100 %}%</td>
         <td>{{ consumer.annual_savings }}</td>
         <td>{{ consumer.monthly_savings }}</td>
     </tr>
