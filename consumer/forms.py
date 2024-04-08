@@ -1,5 +1,5 @@
 from django import forms
-from .models import (
+from consumer.models import (
     ConsumerType,
     ConsumptionRange,
     Consumer,

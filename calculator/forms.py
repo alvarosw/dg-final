@@ -1,5 +1,5 @@
 from django import forms
-from .models import ConsumerType
+from consumer.models import ConsumerType
 
 class CalculatorForm(forms.Form):
     consumption1 = forms.IntegerField(required=True, label='Consumo no Primeiro Mês')
